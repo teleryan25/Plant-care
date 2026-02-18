@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>🌿 Plant Care</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+:root {
+  --bg: #f6f8f5;
+  --card: #ffffff;
+  --accent: #5f8f72;
+  --accent-soft: #e4efe9;
+  --text: #2f3a33;
+  --warning: #d9a441;
+  --danger: #c85c5c;
+}
+
+* {
+  box-sizing: border-box;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont;
+}
+
+body {
+  margin: 0;
+  padding: 1rem;
+  background: var(--bg);
+  color: var(--text);
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: .5rem;
+}
+
+.top {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,.05);
+}
+
+.ring {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background:
+    conic-gradient(var(--accent) calc(var(--p) * 1%), #e0e0e0 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: auto;
+}
+
+.ring span {
+  background: var(--card);
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--card);
+  padding: .8rem 1.2rem;
+  border-radius: 999px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.15);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .5s;
+}
+
+.toast.show {
+  opacity: 1;
+}
+
+form, .plant {
+  background: var(--card);
+  padding: 1rem;
+  border-radius: 14px;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,.05);
+}
+
+input, textarea, select, button {
+  width: 100%;
+  margin-bottom: .5rem;
+  padding: .6rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+button {
+  background: var(--accent);
+  color: white;
+  border: none;
+  font-weight: 600;
+}
+
+.plants {
+  display: grid;
+  gap: 1rem;
+}
+
+.plant img {
+  width: 100%;
+  border-radius: 10px;
+  margin-bottom: .5rem;
+}
+
+.status.soon { color: var(--warning); }
+.status.overdue { color: var(--danger); }
+
+.actions button {
+  background: var(--accent-soft);
+  color: var(--text);
+  margin-top: .3rem;
+}
+
+.actions button.primary {
+  background: var(--accent);
+  color: white;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🌿 Plant Care</h1>
+
+<div class="top">
+  <div class="ring" id="ring" style="--p:0">
+    <span id="score">—</span>
+  </div>
+  <p style="text-align:center;margin:.5rem 0 0" id="ringText"></p>
+</div>
+
+<form id="plantForm">
+  <input required placeholder="Plant name" id="name">
+  <input type="date" required id="planted">
+  <input type="number" required placeholder="Water every X days" id="interval">
+  <input type="file" accept="image/*" id="image">
+  <button>Add Plant</button>
+</form>
+
+<select id="sort">
+  <option value="due">Sort: Needs water</option>
+  <option value="name">Sort: Name</option>
+</select>
+
+<div class="plants" id="plants"></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let plants = JSON.parse(localStorage.getItem("plants")||"[]");
+let log = JSON.parse(localStorage.getItem("log")||"[]");
+let lastMsg = localStorage.getItem("lastMsg") || "";
+
+const general = [
+"Small care adds up 🌱","You’re showing up","Growth takes patience",
+"That plant felt that","You’re doing something right",
+"Consistency beats perfection","Quiet progress counts",
+"Plants thrive with gentle care","One step at a time",
+"You’re building something good"
+];
+
+const ryan = [
+"You’re doing great! Proud of you! — From Ryan",
+"Probably thinking about you right now — From Ryan",
+"I’m glad you’re taking care of your plants as well as you take care of me! — From Ryan",
+"You’re cute today — From Ryan",
+"Look at dat butt! — From Ryan",
+"I might be distracted right now, but I’m still thinking about you — From Ryan",
+"This is your reminder that we need ice cream — From Ryan",
+"How you doin? — From Ryan",
+"Go on. GIT — From Ryan",
+"You complete me — From Ryan"
+];
+
+function save(){
+  localStorage.setItem("plants",JSON.stringify(plants));
+  localStorage.setItem("log",JSON.stringify(log));
+}
+
+function days(a,b){return Math.floor((b-a)/86400000)}
+
+function maybeMessage(){
+  const today = new Date().toDateString();
+  if(lastMsg===today) return;
+  lastMsg=today;
+  localStorage.setItem("lastMsg",today);
+  const pool = Math.random()<0.2 ? ryan : general;
+  const msg = pool[Math.floor(Math.random()*pool.length)];
+  const t=document.getElementById("toast");
+  t.textContent=msg;
+  t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),3500);
+}
+
+function score(){
+  const cutoff = Date.now()-30*86400000;
+  const recent = log.filter(l=>l.t>cutoff);
+  if(!recent.length) return null;
+  return Math.round(100*recent.filter(l=>l.ok).length/recent.length);
+}
+
+function renderScore(){
+  const s=score();
+  const ring=document.getElementById("ring");
+  const txt=document.getElementById("ringText");
+  if(s===null){
+    document.getElementById("score").textContent="—";
+    txt.textContent="Care consistency (last 30 days)";
+    ring.style="--p:0";
+  } else {
+    document.getElementById("score").textContent=s+"%";
+    ring.style=`--p:${s}`;
+    txt.textContent=s>90?"You’re absolutely crushing it":
+      s>70?"You’re doing really well":
+      "Plants are forgiving 🌱";
+  }
+}
+
+function water(i){
+  const p=plants[i];
+  const last=new Date(p.lastWatered);
+  const due=days(last,new Date())<=p.interval+1;
+  log.push({t:Date.now(),ok:due});
+  p.lastWatered=new Date().toISOString();
+  save();
+  maybeMessage();
+  render();
+}
+
+function render(){
+  renderScore();
+  const list=document.getElementById("plants");
+  list.innerHTML="";
+  let sorted=[...plants];
+  if(sort.value==="name") sorted.sort((a,b)=>a.name.localeCompare(b.name));
+  else sorted.sort((a,b)=>{
+    const da=days(new Date(a.lastWatered),new Date())-a.interval;
+    const db=days(new Date(b.lastWatered),new Date())-b.interval;
+    return db-da;
+  });
+
+  sorted.forEach((p,i)=>{
+    const d=days(new Date(p.lastWatered),new Date());
+    const due=p.interval-d;
+    const s=due<0?"overdue":due<=1?"soon":"";
+    list.innerHTML+=`
+    <div class="plant">
+      ${p.image?`<img src="${p.image}">`:""}
+      <strong>${p.name}</strong>
+      <div class="status ${s}">
+        ${due<0?`Overdue by ${-due} days`:
+          due<=1?"Water soon":`Water in ${due} days`}
+      </div>
+      <textarea placeholder="Notes…" oninput="plants[${i}].notes=this.value;save()">${p.notes||""}</textarea>
+      <div class="actions">
+        <button class="primary" onclick="water(${i})">Watered today</button>
+      </div>
+    </div>`;
+  });
+}
+
+plantForm.onsubmit=async e=>{
+  e.preventDefault();
+  let img="";
+  if(image.files[0]){
+    img=await new Promise(r=>{
+      const f=new FileReader();
+      f.onload=()=>r(f.result);
+      f.readAsDataURL(image.files[0]);
+    });
+  }
+  plants.push({
+    name:name.value,
+    planted:planted.value,
+    interval:+interval.value,
+    lastWatered:new Date().toISOString(),
+    image:img,
+    notes:""
+  });
+  save();
+  render();
+  e.target.reset();
+};
+
+sort.onchange=render;
+render();
+</script>
+</body>
+</html>
