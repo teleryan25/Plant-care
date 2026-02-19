@@ -1,221 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>🌿 Plant Care</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Plant Care 🌿</title>
 
 <style>
-:root{
-  --bg:#eef4f1;
-  --card:rgba(255,255,255,.92);
-  --accent:#4caf87;
-  --accent-dark:#3e8c70;
-  --text:#2b3a33;
-  --warn:#e6a23c;
-  --danger:#e94f4f;
-  --shadow:0 10px 30px rgba(0,0,0,.08);
+:root {
+  --bg: #f4f7f5;
+  --card: #ffffff;
+  --accent: #5fa37a;
+  --accent-soft: #e4f1ea;
+  --text: #2e3d35;
+  --muted: #7a8f84;
+  --shadow: 0 12px 30px rgba(0,0,0,.08);
 }
-*{box-sizing:border-box;font-family:'Montserrat',sans-serif}
-body{margin:0;background:var(--bg);padding:1rem;color:var(--text)}
-h1{text-align:center;color:var(--accent);margin:.5rem 0 1rem}
 
-.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:1rem;margin-bottom:1rem;backdrop-filter:blur(8px)}
-input,textarea,button,select{
-  width:100%;padding:.75rem;border-radius:14px;border:1px solid #ccc;margin-bottom:.6rem;font-size:1rem
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+  background: linear-gradient(180deg, #f7faf8, #eef3f1);
+  color: var(--text);
 }
-button{background:var(--accent);color:#fff;font-weight:600;border:none}
-button:hover{background:var(--accent-dark)}
-.small{font-size:.8rem;opacity:.7}
 
-.plants{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem}
-.plant img{width:100%;border-radius:16px;margin-bottom:.4rem}
-.plant{transition:transform .2s}
-.plant:hover{transform:translateY(-4px)}
-
-.status.warn{color:var(--warn);font-weight:600}
-.status.danger{color:var(--danger);font-weight:600}
-
-.actions{display:flex;gap:.4rem}
-.actions button{flex:1}
-
-.toast{
-  position:fixed;bottom:25px;left:50%;transform:translateX(-50%) translateY(20px);
-  background:white;border-radius:999px;padding:1rem 1.4rem;
-  box-shadow:0 12px 30px rgba(0,0,0,.15);
-  opacity:0;pointer-events:none;transition:.4s;font-weight:600
+header {
+  padding: 28px 20px 18px;
+  text-align: center;
 }
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-.ring{
-  width:140px;height:140px;border-radius:50%;
-  background:conic-gradient(var(--accent) calc(var(--p)*1%), #ddd 0);
-  display:flex;align-items:center;justify-content:center;margin:auto
+header h1 {
+  margin: 0;
+  font-weight: 600;
 }
-.ring span{
-  background:white;width:100px;height:100px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;font-weight:700
+
+header p {
+  margin-top: 6px;
+  color: var(--muted);
+}
+
+main {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+}
+
+section {
+  background: var(--card);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  padding: 20px;
+  margin-bottom: 22px;
+}
+
+h2 {
+  margin-top: 0;
+}
+
+label {
+  display: block;
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 12px;
+}
+
+input, textarea, button {
+  width: 100%;
+  padding: 10px 12px;
+  margin-top: 6px;
+  border-radius: 12px;
+  border: 1px solid #dce5e0;
+  font-size: 14px;
+}
+
+textarea { resize: vertical; }
+
+button {
+  background: var(--accent);
+  color: white;
+  border: none;
+  margin-top: 14px;
+  font-weight: 500;
+}
+
+button.secondary {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.plant {
+  border-radius: 16px;
+  background: #fbfdfc;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: inset 0 0 0 1px #e8f0ec;
+}
+
+.plant h3 {
+  margin: 0 0 6px;
+}
+
+.meta {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.actions button {
+  flex: 1;
+}
+
+.score {
+  text-align: center;
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--accent);
 }
 </style>
 </head>
 
 <body>
 
-<h1>🌿 Plant Care</h1>
+<header>
+  <h1>🌿 Plant Care</h1>
+  <p>Your happy little plant world</p>
+</header>
 
-<div class="card" style="text-align:center">
-  <div class="ring" id="ring" style="--p:0"><span id="score">—</span></div>
-  <div class="small" id="scoreText">Last 30 days</div>
-</div>
+<main>
 
-<div class="card">
-<form id="form">
-  <input id="name" placeholder="Plant name" required>
+<section>
+  <h2>Add a Plant</h2>
 
-  <input type="number" id="waterInterval" placeholder="Water every X days" required>
-  <input type="date" id="lastWatered">
-
-  <input type="number" id="repotInterval" placeholder="Repot every X days">
-  <input type="date" id="lastRepotted">
-
-  <input type="number" id="fertInterval" placeholder="Fertilize every X days">
-  <input type="date" id="lastFertilized">
-
-  <input type="file" id="image" accept="image/*">
-  <button>Add Plant 🌱</button>
-</form>
-</div>
-
-<div class="plants" id="plants"></div>
-<div class="toast" id="toast"></div>
-
-<script>
-const $=id=>document.getElementById(id)
-let plants=JSON.parse(localStorage.getItem("plants")||"[]")
-let log=JSON.parse(localStorage.getItem("log")||"[]")
-let lastMsg=localStorage.getItem("lastMsg")||""
-
-const msgs=[
-"Small care adds up 🌱","You’re doing great","Plants notice effort",
-"Quiet progress counts","Go on. GIT — From Ryan",
-"You’re amazing — From Ryan","This plant loves you",
-"You complete me — From Ryan"
-]
-
-function save(){
-  localStorage.setItem("plants",JSON.stringify(plants))
-  localStorage.setItem("log",JSON.stringify(log))
-}
-
-function days(a,b){return Math.floor((b-a)/86400000)}
-
-function toast(msg){
-  const t=$("toast")
-  t.textContent=msg
-  t.classList.add("show")
-  setTimeout(()=>t.classList.remove("show"),3500)
-}
-
-function maybeMsg(){
-  const today=new Date().toDateString()
-  if(today===lastMsg)return
-  lastMsg=today
-  localStorage.setItem("lastMsg",today)
-  toast(msgs[Math.floor(Math.random()*msgs.length)])
-}
-
-function score(){
-  const cutoff=Date.now()-30*86400000
-  const recent=log.filter(l=>l.t>cutoff)
-  if(!recent.length)return null
-  return Math.round(100*recent.filter(l=>l.ok).length/recent.length)
-}
-
-function renderScore(){
-  const s=score()
-  $("ring").style="--p:"+(s||0)
-  $("score").textContent=s?s+"%":"—"
-}
-
-function addCalendar(p,type){
-  const map={
-    water:["💧 Water","waterInterval","lastWatered"],
-    repot:["🪴 Repot","repotInterval","lastRepotted"],
-    fert:["🌱 Fertilize","fertInterval","lastFertilized"]
-  }
-  const [title,intKey,lastKey]=map[type]
-  if(!p[intKey])return
-
-  const start=new Date(p[lastKey]).toISOString().split("T")[0].replace(/-/g,"")
-  const ics=`BEGIN:VCALENDAR
-VERSION:2.0
-BEGIN:VEVENT
-SUMMARY:${title} ${p.name}
-DTSTART:${start}
-RRULE:FREQ=DAILY;INTERVAL=${p[intKey]}
-END:VEVENT
-END:VCALENDAR`
-
-  const blob=new Blob([ics],{type:"text/calendar"})
-  const a=document.createElement("a")
-  a.href=URL.createObjectURL(blob)
-  a.download=`${p.name}-${type}.ics`
-  a.click()
-}
-
-function render(){
-  renderScore()
-  $("plants").innerHTML=""
-  plants.forEach(p=>{
-    const now=Date.now()
-    const w=days(p.lastWatered,now)-p.waterInterval
-    const r=days(p.lastRepotted,now)-(p.repotInterval||99999)
-    const f=days(p.lastFertilized,now)-(p.fertInterval||99999)
-
-    $("plants").innerHTML+=`
-    <div class="card plant">
-      ${p.image?`<img src="${p.image}">`:""}
-      <strong>${p.name}</strong>
-      <div class="status ${w>0?'danger':w>-2?'warn':''}">💧 ${w>0?'Overdue':Math.abs(w)} days</div>
-      ${p.repotInterval?`<div class="status ${r>0?'warn':''}">🪴 Repot ${r>0?'due':''}</div>`:""}
-      ${p.fertInterval?`<div class="status ${f>0?'warn':''}">🌱 Fertilize ${f>0?'due':''}</div>`:""}
-
-      <textarea oninput="p.notes=this.value;save()">${p.notes||""}</textarea>
-
-      <div class="actions">
-        <button onclick="p.lastWatered=Date.now();log.push({t:Date.now(),ok:true});save();maybeMsg();render()">💧</button>
-        <button onclick="addCalendar(p,'water')">📅</button>
-      </div>
-    </div>`
-  })
-}
-
-$("form").onsubmit=async e=>{
-  e.preventDefault()
-  let img=""
-  if(image.files[0]){
-    img=await new Promise(r=>{
-      const f=new FileReader()
-      f.onload=()=>r(f.result)
-      f.readAsDataURL(image.files[0])
-    })
-  }
-  plants.push({
-    id:crypto.randomUUID(),
-    name:name.value,
-    waterInterval:+waterInterval.value,
-    repotInterval:+repotInterval.value||null,
-    fertInterval:+fertInterval.value||null,
-    lastWatered:new Date(lastWatered.value||Date.now()).getTime(),
-    lastRepotted:new Date(lastRepotted.value||Date.now()).getTime(),
-    lastFertilized:new Date(lastFertilized.value||Date.now()).getTime(),
-    image:img,notes:""
-  })
-  save();render();e.target.reset()
-}
-
-render()
-</script>
-</body>
-</html>
+  <label>Plant Name</lab
